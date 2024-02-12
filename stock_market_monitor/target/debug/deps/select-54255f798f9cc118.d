@@ -1,0 +1,11 @@
+D:\winter2024\ECE421\project\stock_market_monitor\stock_market_monitor\target\debug\deps\libselect-54255f798f9cc118.rmeta: C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\lib.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\document.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\node.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\predicate.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\selection.rs
+
+D:\winter2024\ECE421\project\stock_market_monitor\stock_market_monitor\target\debug\deps\libselect-54255f798f9cc118.rlib: C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\lib.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\document.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\node.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\predicate.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\selection.rs
+
+D:\winter2024\ECE421\project\stock_market_monitor\stock_market_monitor\target\debug\deps\select-54255f798f9cc118.d: C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\lib.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\document.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\node.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\predicate.rs C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\selection.rs
+
+C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\lib.rs:
+C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\document.rs:
+C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\node.rs:
+C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\predicate.rs:
+C:\Users\Hp\.cargo\registry\src\index.crates.io-6f17d22bba15001f\select-0.6.0\src\selection.rs:
