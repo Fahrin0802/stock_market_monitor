@@ -16,9 +16,8 @@ fn get_stock_prices(
     stock_name: &str,
     end_date: OffsetDateTime,
     start_date: OffsetDateTime,
+    provider: &YahooConnector,
 ) -> Vec<Quote> {
-    let provider = yahoo::YahooConnector::new();
-
     // returns historic quotes with daily interval
     let resp =
         tokio_test::block_on(provider.get_quote_history(stock_name, start_date, end_date)).unwrap();
@@ -56,7 +55,7 @@ fn plot_prices(
     Ok(())
 }
 
-fn is_valid_stock(stock_name: &str, provider: YahooConnector) -> bool {
+fn is_valid_stock(stock_name: &str, provider: &YahooConnector) -> bool {
     match tokio_test::block_on(provider.get_latest_quotes(stock_name, "1d")) {
         Ok(_) => true,
         Err(_) => false,
@@ -75,7 +74,7 @@ fn main() {
     let stock_name: &str = &args.stock_name;
 
     let provider = yahoo::YahooConnector::new();
-    if !is_valid_stock(stock_name, provider) {
+    if !is_valid_stock(stock_name, &provider) {
         eprintln!("Error: The stock symbol {} is not valid.", stock_name);
         process::exit(1);
     }
@@ -84,7 +83,7 @@ fn main() {
     let today = OffsetDateTime::now_utc();
     let six_months_ago = today - Duration::days(30 * 6);
 
-    let quotes = get_stock_prices(stock_name, today, six_months_ago);
+    let quotes = get_stock_prices(stock_name, today, six_months_ago, &provider);
 
     let mut series = Vec::new();
 
