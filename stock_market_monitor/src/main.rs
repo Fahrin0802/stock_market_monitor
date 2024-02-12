@@ -1,4 +1,6 @@
+use std::process;
 use time::{Duration, OffsetDateTime};
+use yahoo::YahooConnector;
 use yahoo_finance_api as yahoo;
 use yahoo_finance_api::Quote;
 
@@ -53,6 +55,13 @@ fn plot_prices(
     ))?;
     Ok(())
 }
+
+fn is_valid_stock(stock_name: &str, provider: YahooConnector) -> bool {
+    match tokio_test::block_on(provider.get_latest_quotes(stock_name, "1d")) {
+        Ok(_) => true,
+        Err(_) => false,
+    }
+}
 /// Generate plots from inputted stock names
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -64,6 +73,12 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let stock_name: &str = &args.stock_name;
+
+    let provider = yahoo::YahooConnector::new();
+    if !is_valid_stock(stock_name, provider) {
+        eprintln!("Error: The stock symbol {} is not valid.", stock_name);
+        process::exit(1);
+    }
 
     // Get today's date and six months prior date
     let today = OffsetDateTime::now_utc();
