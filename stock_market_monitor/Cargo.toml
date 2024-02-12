@@ -11,3 +11,4 @@ time = "0.3.34"
 tokio-test = "0.4.3"
 plotters = "0.3.4"
 chrono = "0.4.34"
+clap = { version = "4.5.0", features = ["derive"] }
