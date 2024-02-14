@@ -98,10 +98,8 @@ fn main() {
     let today = OffsetDateTime::now_utc();
     let six_months_ago = today - Duration::days(30 * 6);
 
-    let quotes = get_stock_prices(stock_name, today, six_months_ago, &provider);
+    let quotes: Vec<Quote> = get_stock_prices(stock_name, today, six_months_ago, &provider);
 
-    let mut series = Vec::new();
-    let mut volatile_days = Vec::new();
 
     // TODO remove deprecated functions
     let min_date: NaiveDate = NaiveDate::from_ymd(
@@ -109,43 +107,50 @@ fn main() {
         six_months_ago.month() as u32,
         six_months_ago.day().into(),
     );
-    let max_date: NaiveDate =
-        NaiveDate::from_ymd(today.year(), today.month() as u32, today.day().into());
+    let max_date: NaiveDate = NaiveDate::from_ymd(
+        today.year(), 
+        today.month() as u32, 
+        today.day().into());
 
-    let mut min_item = DatePricePair {
-        date: min_date,
-        price: 10000.0,
-    };
-    let mut max_item = DatePricePair {
-        date: max_date,
-        price: 0.0,
-    };
 
-    // TODO get max and min closing price
-    for item in quotes {
-        let datetime_utc = Utc.timestamp(item.timestamp as i64, 0);
-        let item_date: NaiveDate = NaiveDate::from_ymd(
+    let date_quote_pairs  = quotes.iter().map(|quote| {
+        let datetime_utc = Utc.timestamp(quote.timestamp as i64, 0);
+        let quote_date: NaiveDate = NaiveDate::from_ymd(
             datetime_utc.year(),
             datetime_utc.month() as u32,
             datetime_utc.day().into(),
         );
-        if (item.high - item.low) / item.close > 0.02 {
-            let volatile_day: (NaiveDate, Quote) = (item_date, item.clone());
-            volatile_days.push(volatile_day);
-        }
+        (quote_date, quote)
+    });
 
-        let daily: (NaiveDate, f64) = (item_date, item.close);
-        series.push(daily);
+    let series: Vec<(NaiveDate, f64)> = date_quote_pairs.clone().map(|(quote_date, quote)|{
+        (quote_date, quote.close)
+    }).collect();
 
-        if item.close > max_item.price {
-            max_item.date = item_date;
-            max_item.price = item.close;
-        }
-        if item.close < min_item.price {
-            min_item.date = item_date;
-            min_item.price = item.close;
-        }
-    }
+    let volatile_days: Vec<(NaiveDate, Quote)> = date_quote_pairs.clone().filter(|(_, quote)| {
+        (quote.high - quote.low) / quote.close > 0.02
+    }).map(|(quote_date, quote)|{
+        (quote_date, quote.clone())
+    }).collect();
+
+    let (min_quote_date, min_quote_price) = date_quote_pairs.clone().min_by(|(_, quote1), (_, quote2)| {
+        quote1.close.partial_cmp(&quote2.close).unwrap()})
+    .map(|(date, quote)| (date, quote.close))
+    .unwrap();
+
+    let (max_quote_date, max_quote_price) = date_quote_pairs.max_by(|(_, quote1), (_, quote2)| {
+        quote1.close.partial_cmp(&quote2.close).unwrap()})
+    .map(|(date, quote)| (date, quote.close))
+    .unwrap();
+
+    let min_item = DatePricePair {
+        date: min_quote_date,
+        price: min_quote_price,
+    };
+    let mut max_item = DatePricePair {
+        date: max_quote_date,
+        price: max_quote_price,
+    };
 
     println!(
         "{} Stats:\nMax Closing Price: ${:.2} on {}\nMin Closing Price: ${:.2} on {}",
