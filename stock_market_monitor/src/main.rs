@@ -112,7 +112,7 @@ fn main() {
         today.month() as u32, 
         today.day().into());
 
-
+    //This iterator is created to help derive the daily data, volatile days and min/max close
     let date_quote_pairs  = quotes.iter().map(|quote| {
         let datetime_utc = Utc.timestamp(quote.timestamp as i64, 0);
         let quote_date: NaiveDate = NaiveDate::from_ymd(
@@ -147,7 +147,7 @@ fn main() {
         date: min_quote_date,
         price: min_quote_price,
     };
-    let mut max_item = DatePricePair {
+    let max_item = DatePricePair {
         date: max_quote_date,
         price: max_quote_price,
     };
