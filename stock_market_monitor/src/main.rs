@@ -12,6 +12,11 @@ use chrono::{Datelike, NaiveDate, TimeZone, Utc};
 
 use clap::Parser;
 
+use std::{
+    io::prelude::*,
+    net::{TcpListener, TcpStream},
+};
+
 fn get_stock_prices(
     stock_name: &str,
     end_date: OffsetDateTime,
@@ -24,8 +29,8 @@ fn get_stock_prices(
     return resp.quotes().unwrap();
 }
 
-// TODO add error bars with high, low and close
 fn plot_prices(
+    image_name: &str,
     min_price: f64,
     max_price: f64,
     min_date: NaiveDate,
@@ -35,7 +40,7 @@ fn plot_prices(
     stock_name: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     // Create a drawing area
-    let root = BitMapBackend::new("stock_prices.png", (800, 600)).into_drawing_area();
+    let root = BitMapBackend::new(image_name, (800, 600)).into_drawing_area();
     root.fill(&RGBColor(255, 255, 255))?;
 
     // Configure a line chart
@@ -54,6 +59,8 @@ fn plot_prices(
         series.iter().map(|(x, y)| (*x, *y)),
         &RGBColor(255, 0, 0),
     ))?;
+
+    // Draw the volatility data
     chart
         .draw_series(
             volatile_days.iter().map(|(x, y)| {
@@ -157,22 +164,71 @@ fn main() {
         stock_name, max_item.price, max_item.date, min_item.price, min_item.date
     );
     let _ = plot_prices(
+        "volatile_stock_prices.png",
+        min_item.price,
+        max_item.price,
+        min_date,
+        max_date,
+        series.clone(),
+        volatile_days,
+        stock_name,
+    );
+
+    let _ = plot_prices(
+        "stock_prices.png",
         min_item.price,
         max_item.price,
         min_date,
         max_date,
         series,
-        volatile_days,
+        Vec::new(),
         stock_name,
     );
+
+    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+
+    for stream in listener.incoming() {
+        let stream = stream.unwrap();
+
+        let _ = match handle_connection(stream) {
+            Ok(()) => true,
+            Err(error) => panic!{"Problem Handling Request: {:?}", error}
+        };
+    }
 }
 
-// Quote {
-//     timestamp: 1577975400,
-//     open: 74.05,
-//     high: 75.15,
-//     low: 73.79,
-//     volume: 135480400,
-//     close: 75.08,
-//     adjclose: 73.05
-// }
+fn handle_connection(mut stream: TcpStream) -> std::io::Result<()> {
+    let mut buffer = [0; 1024];
+    stream.read(&mut buffer)?;
+
+    if buffer.starts_with(b"GET / HTTP/1.1\r\n") {
+        let status_line = "HTTP/1.1 200 OK";
+        let contents = std::fs::read_to_string("src/plots.html").unwrap();
+        let length = contents.len();
+
+        stream.write_all(format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}").as_bytes())?;
+        Ok(())
+    } else if buffer.starts_with(b"GET /stock_image.png HTTP/1.1\r\n") {
+        write_file_to_stream("stock_prices.png", stream)
+    
+    } else if buffer.starts_with(b"GET /volatile_image.png HTTP/1.1\r\n") {
+        write_file_to_stream("volatile_stock_prices.png", stream)
+    } else {
+        println!("Invalid Request");
+        Ok(())
+    }
+}
+
+fn write_file_to_stream(name: &str, mut stream: TcpStream)  -> std::io::Result<()> {
+    let mut file = std::fs::File::open(name)?;
+        let mut contents = Vec::new();
+        file.read_to_end(&mut contents)?;
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: stocks_image/png\r\nContent-Length: {}\r\n\r\n",
+            contents.len()
+        );
+        let mut response = response.into_bytes();
+  
+        response.extend(contents);
+        stream.write_all(&response)
+}

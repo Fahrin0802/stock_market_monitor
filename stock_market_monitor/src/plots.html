@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<script type="text/javascript"> 
+			function toggleVolatile()
+			{
+				var img = document.getElementById("stocks_image");
+				if (img.src.includes("stock_image") > 0) {
+					img.src = img.src.replace("stock_image", "volatile_image")
+				} else {
+					img.src = img.src.replace("volatile_image", "stock_image")
+				}
+			}
+			</script>
+	<meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Stock displayer</title>
+    </head>
+	<main>
+		<img id="stocks_image" src="volatile_image.png">
+	    </div>
+		<button onclick="toggleVolatile()">Click to show/remove volatility data</button>
+	</main>
+    </body>
+</html>
