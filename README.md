@@ -1,4 +1,4 @@
-# Stock Market Monitor
+# Stock Market Monitor V0.1.0
 
 ### 1. Crates Used and Purpose
 
@@ -26,30 +26,26 @@ Both line charts feature axes dependant on the specific stocks maximum and minum
 
 ### 4. Project Setup
 
-The program first calls the Yahoo API to collect all the data for the requested stock for the last 6 months.
-Then the volatility data is calculated for each day's data based on the formula above. Using this data, 2 charts are created as a png. One contains only the daily closing price data and the other also contains the volatility data.
-Lastly, the backend is hosted on the local host using the specified port. The frontend can request either of the two plots and display it to the user.
+- Download stock_market_monitor v0.1.0
+- Navigate to the inner folder `stock_market_monitor/stock_market_monitor/`
+- Build the program with `cargo build --release`
+- Follow the usage instructions below
 
 ### 5. Usage Intructions
 
-Debug:
-
-- `cargo run <STOCK_TICKER>`
-- `cargo run <STOCK_TICKER> <PORT_NUMBER>`
-
 Release:
 
-- `cargo run <STOCK_TICKER>`
-- `cargo run <STOCK_TICKER> <PORT_NUMBER>`
+- `cargo run --release <STOCK_TICKER>`
+- `cargo run --release <STOCK_TICKER> <PORT_NUMBER>`
 
 Examples:
 
-- `cargo run AAPL`
+- `cargo run --release AAPL`
 - `cargo run --release TSLA 7000`
 
 For help with the program:
 
-- `cargo run -- --help`
+- `cargo run --release --help`
 
 Viewing in browser:
 
