@@ -240,7 +240,10 @@ fn main() {
 
     // Serve the generated plots on local host
     let address = format!("127.0.0.1:{}", port_number);
-    let listener = TcpListener::bind(address).unwrap();
+    let listener = match TcpListener::bind(address) {
+        Ok(l) => l,
+        Err(_) => panic!{"Problem hosting backend. Please ensure a valid port number is specified."}
+    };
     println!("Open http://127.0.0.1:{} in your browser", port_number);
     listener.incoming().into_iter().for_each(|stream: Result<TcpStream, std::io::Error>| {
         let stream = stream.unwrap();
