@@ -1,4 +1,4 @@
-# Stock Market Monitor V0.1.0
+# Stock Market Monitor v0.1.0
 
 ### 1. Crates Used and Purpose
 
