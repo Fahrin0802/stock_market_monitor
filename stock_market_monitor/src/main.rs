@@ -233,13 +233,12 @@ fn main() {
     );
 
     // Serve the generated plots on local host
-    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
-    for stream in listener.incoming() {
+    let listener = TcpListener::bind("127.0.0.1:4567").unwrap();
+    listener.incoming().into_iter().for_each(|stream: Result<TcpStream, std::io::Error>| {
         let stream = stream.unwrap();
-
         let _ = match handle_connection(stream) {
             Ok(()) => true,
             Err(error) => panic!{"Problem Handling Request: {:?}", error}
         };
-    }
+    });
 }
