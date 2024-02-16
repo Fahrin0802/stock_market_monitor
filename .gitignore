@@ -1,3 +1,4 @@
 stock_market_monitor/target/debug/stock_market_monitor.d
 stock_market_monitor/target/.rustc_info.json
-*.png
+stock_market_monitor/*.png
+stock_market_monitor/Cargo.lock
