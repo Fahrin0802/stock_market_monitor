@@ -122,11 +122,17 @@ fn write_file_to_stream(name: &str, mut stream: TcpStream)  -> std::io::Result<(
 struct Args {
     /// Name of the stock ticker, ex. AAPL
     stock_name: String,
+    /// Local port number to host the fancy plot
+    port_number: Option<String>
 }
 
 fn main() {
     let args = Args::parse();
     let stock_name: &str = &args.stock_name;
+    let port_number: u32 = match &args.port_number {
+        Some(p) => p.parse().unwrap_or(4567),
+        None => 4567,
+    };
 
     let provider = yahoo::YahooConnector::new();
 
@@ -233,7 +239,9 @@ fn main() {
     );
 
     // Serve the generated plots on local host
-    let listener = TcpListener::bind("127.0.0.1:4567").unwrap();
+    let address = format!("127.0.0.1:{}", port_number);
+    let listener = TcpListener::bind(address).unwrap();
+    println!("Open http://127.0.0.1:{} in your browser", port_number);
     listener.incoming().into_iter().for_each(|stream: Result<TcpStream, std::io::Error>| {
         let stream = stream.unwrap();
         let _ = match handle_connection(stream) {
