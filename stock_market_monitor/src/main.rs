@@ -79,6 +79,43 @@ fn is_valid_stock(stock_name: &str, provider: &YahooConnector) -> bool {
     }
 }
 
+fn handle_connection(mut stream: TcpStream) -> std::io::Result<()> {
+    let mut buffer = [0; 1024];
+    stream.read(&mut buffer)?;
+
+    // Handle the recieved request
+    if buffer.starts_with(b"GET / HTTP/1.1\r\n") { // Serve the html file
+        let status_line = "HTTP/1.1 200 OK";
+        let contents = std::fs::read_to_string("src/plots.html").unwrap();
+        let length = contents.len();
+
+        stream.write_all(format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}").as_bytes())?;
+        Ok(())
+    } else if buffer.starts_with(b"GET /stock_image.png HTTP/1.1\r\n") { // Serve the plot without volatility data
+        write_file_to_stream("stock_prices.png", stream)
+    
+    } else if buffer.starts_with(b"GET /volatile_image.png HTTP/1.1\r\n") { // Serve the plot with volatility data
+        write_file_to_stream("volatile_stock_prices.png", stream)
+    } else { // Invalid request case
+        println!("Invalid Request");
+        Ok(())
+    }
+}
+
+fn write_file_to_stream(name: &str, mut stream: TcpStream)  -> std::io::Result<()> {
+    let mut file = std::fs::File::open(name)?;
+        let mut contents = Vec::new();
+        file.read_to_end(&mut contents)?;
+        let response = format!(
+            "HTTP/1.1 200 OK\r\nContent-Type: stocks_image/png\r\nContent-Length: {}\r\n\r\n",
+            contents.len()
+        );
+        let mut response = response.into_bytes();
+  
+        response.extend(contents);
+        stream.write_all(&response)
+}
+
 /// Generate plots from inputted stock names
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -155,15 +192,19 @@ fn main() {
         (quote_date, quote.clone())
     }).collect();
 
-    // Derive max and min closing prices over 6 months
+    // Derive min closing prices over 6 months
     let (min_quote_date, min_quote_price) = date_quote_pairs.clone().min_by(|(_, quote1), (_, quote2)| {
         quote1.close.partial_cmp(&quote2.close).unwrap()})
     .map(|(date, quote)| (date, quote.close))
     .unwrap();
+
+    // Derive max closing prices over 6 months
     let (max_quote_date, max_quote_price) = date_quote_pairs.max_by(|(_, quote1), (_, quote2)| {
         quote1.close.partial_cmp(&quote2.close).unwrap()})
     .map(|(date, quote)| (date, quote.close))
     .unwrap();
+
+    // Ouput the min/max data
     println!(
         "{} Stats:\nMax Closing Price: ${:.2} on {}\nMin Closing Price: ${:.2} on {}",
         stock_name, max_quote_price, max_quote_date, min_quote_price, min_quote_date
@@ -201,41 +242,4 @@ fn main() {
             Err(error) => panic!{"Problem Handling Request: {:?}", error}
         };
     }
-}
-
-fn handle_connection(mut stream: TcpStream) -> std::io::Result<()> {
-    let mut buffer = [0; 1024];
-    stream.read(&mut buffer)?;
-
-    // Handle the recieved request
-    if buffer.starts_with(b"GET / HTTP/1.1\r\n") { // Serve the html file
-        let status_line = "HTTP/1.1 200 OK";
-        let contents = std::fs::read_to_string("src/plots.html").unwrap();
-        let length = contents.len();
-
-        stream.write_all(format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}").as_bytes())?;
-        Ok(())
-    } else if buffer.starts_with(b"GET /stock_image.png HTTP/1.1\r\n") { // Serve the plot without volatility data
-        write_file_to_stream("stock_prices.png", stream)
-    
-    } else if buffer.starts_with(b"GET /volatile_image.png HTTP/1.1\r\n") { // Serve the plot with volatility data
-        write_file_to_stream("volatile_stock_prices.png", stream)
-    } else { // Invalid request case
-        println!("Invalid Request");
-        Ok(())
-    }
-}
-
-fn write_file_to_stream(name: &str, mut stream: TcpStream)  -> std::io::Result<()> {
-    let mut file = std::fs::File::open(name)?;
-        let mut contents = Vec::new();
-        file.read_to_end(&mut contents)?;
-        let response = format!(
-            "HTTP/1.1 200 OK\r\nContent-Type: stocks_image/png\r\nContent-Length: {}\r\n\r\n",
-            contents.len()
-        );
-        let mut response = response.into_bytes();
-  
-        response.extend(contents);
-        stream.write_all(&response)
 }
